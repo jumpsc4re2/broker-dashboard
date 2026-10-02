@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TradeType {
+  buy
+  sell
+}
+
+model Account {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique
+  phone     String
+  country   String
+  currency  String
+  balance   Float
+  createdAt DateTime   @default(now())
+  positions Position[]
+  trades    Trade[]
+}
+
+model Position {
+  id         Int       @id @default(autoincrement())
+  accountId  Int
+  symbol     String
+  type       TradeType
+  openPrice  Float
+  stopLoss   Float?
+  takeProfit Float?
+  volume     Float
+  createdAt  DateTime  @default(now())
+  account    Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+}
+
+model Trade {
+  id         Int       @id @default(autoincrement())
+  accountId  Int
+  symbol     String
+  type       TradeType
+  openPrice  Float
+  closePrice Float
+  stopLoss   Float?
+  takeProfit Float?
+  swap       Float
+  profit     Float
+  createdAt  DateTime  @default(now())
+  account    Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+}
+
+model Moderator {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  isSuperAdmin Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
+model Currency {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String
+  createdAt   DateTime @default(now())
+}
+
+model Symbol {
+  id          Int      @id @default(autoincrement())
+  symbolName  String   @unique
+  category    String
+  description String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
